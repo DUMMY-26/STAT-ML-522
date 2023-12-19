@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.10) (preloaded format=pdflatex 2023.10.12)  19 DEC 2023 20:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.10) (preloaded format=pdflatex 2023.10.12)  20 DEC 2023 02:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1707,4 +1707,255 @@ LaTeX Font Info:    Trying to load font information for U+msa on input line 93.
  (D:\mictex\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font i
+LaTeX Font Info:    Trying to load font information for U+msb on input line 93.
+
+(D:\mictex\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+LaTeX Font Info:    Trying to load font information for U+rsfs on input line 93
+.
+ (D:\mictex\tex/latex/jknappen\ursfs.fd
+File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
+)
+LaTeX Font Info:    Trying to load font information for U+ntxmia on input line 
+93.
+
+(D:\mictex\tex/latex/newtx\untxmia.fd
+File: untxmia.fd 2018/04/14 Fontinst v1.933 font definitions for U/ntxmia.
+)
+LaTeX Font Info:    Trying to load font information for U+ntxsym on input line 
+93.
+ (D:\mictex\tex/latex/newtx\untxsym.fd
+File: untxsym.fd 2023/08/16 Fontinst v1.933 font definitions for U/ntxsym.
+)
+LaTeX Font Info:    Trying to load font information for U+ntxsyc on input line 
+93.
+
+(D:\mictex\tex/latex/newtx\untxsyc.fd
+File: untxsyc.fd 2012/04/12 Fontinst v1.933 font definitions for U/ntxsyc.
+)
+LaTeX Font Info:    Trying to load font information for T2A+ntxtlf on input lin
+e 93.
+LaTeX Font Info:    No file T2Antxtlf.fd. on input line 93.
+
+
+LaTeX Font Warning: Font shape `T2A/ntxtlf/m/n' undefined
+(Font)              using `T2A/cmr/m/n' instead on input line 93.
+
+
+LaTeX Font Warning: Font shape `T2A/ntxtlf/m/it' undefined
+(Font)              using `T2A/ntxtlf/m/n' instead on input line 93.
+
+[2
+
+{D:/mictex/fonts/enc/dvips/newtx/ntx-ot1-tlf.enc}]
+<cnn.png, id=77, 620.3175pt x 264.23718pt>
+File: cnn.png Graphic file (type png)
+<use cnn.png>
+Package pdftex.def Info: cnn.png  used on input line 103.
+(pdftex.def)             Requested size: 307.28987pt x 130.89658pt.
+ [3
+
+ <./cnn.png>]
+<pollingexample.png, id=90, 301.8778pt x 259.7203pt>
+File: pollingexample.png Graphic file (type png)
+<use pollingexample.png>
+Package pdftex.def Info: pollingexample.png  used on input line 107.
+(pdftex.def)             Requested size: 276.559pt x 237.935pt.
+
+Overfull \vbox (4.22443pt too high) detected at line 107
+ []
+
+[4
+
+ <./pollingexample.png>]
+<pooling.png, id=99, 975.645pt x 690.58pt>
+File: pooling.png Graphic file (type png)
+<use pooling.png>
+Package pdftex.def Info: pooling.png  used on input line 117.
+(pdftex.def)             Requested size: 215.10196pt x 152.24419pt.
+ [5
+
+ <./pooling.png (PNG copy)>]
+<cnnexample.png, id=108, 2288.55pt x 1276.77pt>
+File: cnnexample.png Graphic file (type png)
+<use cnnexample.png>
+Package pdftex.def Info: cnnexample.png  used on input line 120.
+(pdftex.def)             Requested size: 338.02072pt x 188.56546pt.
+
+Overfull \hbox (30.73085pt too wide) in paragraph at lines 120--120
+[][]  
+ []
+
+[6
+
+ <./cnnexample.png>]
+<demension.png, id=118, 796.47563pt x 239.39438pt>
+File: demension.png Graphic file (type png)
+<use demension.png>
+Package pdftex.def Info: demension.png  used on input line 123.
+(pdftex.def)             Requested size: 307.28987pt x 92.35889pt.
+ [7
+
+ <./demension.png>]
+<ImageNet.png, id=128, 853.1875pt x 384.43625pt>
+File: ImageNet.png Graphic file (type png)
+<use ImageNet.png>
+Package pdftex.def Info: ImageNet.png  used on input line 127.
+(pdftex.def)             Requested size: 307.28987pt x 138.46146pt.
+ [8
+
+ <./ImageNet.png>] [9
+
+]
+<aug.png, id=158, 551.05875pt x 360.34625pt>
+File: aug.png Graphic file (type png)
+<use aug.png>
+Package pdftex.def Info: aug.png  used on input line 147.
+(pdftex.def)             Requested size: 184.3758pt x 120.56415pt.
+ [10
+
+ <./aug.png>]
+<drop.png, id=180, 793.96625pt x 371.3875pt>
+File: drop.png Graphic file (type png)
+<use drop.png>
+Package pdftex.def Info: drop.png  used on input line 154.
+(pdftex.def)             Requested size: 276.559pt x 129.3642pt.
+ [11
+
+ <./drop.png>]
+<sound.png, id=190, 1393.205pt x 403.5075pt>
+File: sound.png Graphic file (type png)
+<use sound.png>
+Package pdftex.def Info: sound.png  used on input line 159.
+(pdftex.def)             Requested size: 307.28987pt x 88.99973pt.
+ [12
+
+ <./sound.png (PNG copy)>]
+<spec.png, id=199, 646.415pt x 336.25626pt>
+File: spec.png Graphic file (type png)
+<use spec.png>
+Package pdftex.def Info: spec.png  used on input line 162.
+(pdftex.def)             Requested size: 307.28987pt x 159.84651pt.
+ [13
+
+ <./spec.png>]
+<nlp.png, id=210, 967.615pt x 390.45876pt>
+File: nlp.png Graphic file (type png)
+<use nlp.png>
+Package pdftex.def Info: nlp.png  used on input line 166.
+(pdftex.def)             Requested size: 307.28987pt x 124.00204pt.
+
+[14
+
+ <./nlp.png>]
+<king.png, id=220, 1422.31375pt x 212.795pt>
+File: king.png Graphic file (type png)
+<use king.png>
+Package pdftex.def Info: king.png  used on input line 171.
+(pdftex.def)             Requested size: 307.28987pt x 45.97406pt.
+<quin.png, id=221, 1442.38875pt x 499.8675pt>
+File: quin.png Graphic file (type png)
+<use quin.png>
+Package pdftex.def Info: quin.png  used on input line 171.
+(pdftex.def)             Requested size: 307.28987pt x 106.4931pt.
+ [15
+
+ <./king.png> <./quin.png>]
+<all.png, id=232, 987.69pt x 674.52pt>
+File: all.png Graphic file (type png)
+<use all.png>
+Package pdftex.def Info: all.png  used on input line 174.
+(pdftex.def)             Requested size: 307.28987pt x 209.85037pt.
+ [16
+
+ <./all.png (PNG copy)>]
+[17
+
+]
+<relu.png, id=249, 1256.695pt x 788.9475pt>
+File: relu.png Graphic file (type png)
+<use relu.png>
+Package pdftex.def Info: relu.png  used on input line 191.
+(pdftex.def)             Requested size: 307.28987pt x 192.91461pt.
+
+Overfull \vbox (2.13269pt too high) detected at line 191
+ []
+
+[18
+
+ <./relu.png>]
+<AlexNet.png, id=259, 903.375pt x 301.125pt>
+File: AlexNet.png Graphic file (type png)
+<use AlexNet.png>
+Package pdftex.def Info: AlexNet.png  used on input line 194.
+(pdftex.def)             Requested size: 307.28987pt x 102.43167pt.
+ [19
+
+ <./AlexNet.png>]
+<unet.jpg, id=269, 1003.75pt x 501.875pt>
+File: unet.jpg Graphic file (type jpg)
+<use unet.jpg>
+Package pdftex.def Info: unet.jpg  used on input line 198.
+(pdftex.def)             Requested size: 307.28987pt x 153.64217pt.
+ [20
+
+ <./unet.jpg (PNG copy)>]
+<vgg16.png, id=278, 903.375pt x 508.90125pt>
+File: vgg16.png Graphic file (type png)
+<use vgg16.png>
+Package pdftex.def Info: vgg16.png  used on input line 202.
+(pdftex.def)             Requested size: 307.28987pt x 173.10954pt.
+ [21
+
+ <./vgg16.png>]
+\tf@nav=\write6
+\openout6 = `proba.nav'.
+
+\tf@toc=\write7
+\openout7 = `proba.toc'.
+
+\tf@snm=\write8
+\openout8 = `proba.snm'.
+
+ (proba.aux
+LaTeX Font Info:    Trying to load font information for OT1+qhv on input line 2
+3.
+ (D:\mictex\tex/latex/tex-gyre\ot1qhv.fd
+File: ot1qhv.fd 2009/09/25 v1.2 font definition file for OT1/qhv
+)
+LaTeX Font Info:    Font shape `OT1/qhv/m/n' will be
+(Font)              scaled to size 10.29301pt on input line 23.
+)
+ ***********
+LaTeX2e <2023-06-01> patch level 1
+L3 programming layer <2023-10-10>
+ ***********
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+Package rerunfilecheck Info: File `proba.out' has not changed.
+(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
+ ) 
+Here is how much of TeX's memory you used:
+ 34837 strings out of 474785
+ 644536 string characters out of 5766235
+ 1931043 words of memory out of 5000000
+ 56035 multiletter control sequences out of 15000+600000
+ 584928 words of font info for 92 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 128i,15n,123p,417b,648s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<D:/mictex/fonts/type1/public/newtx/NewTXMI.pfb><D:/mictex/fonts/type1/public
+/newtx/NewTXMI7.pfb><D:/mictex/fonts/type1/public/cm-super/sfrm0600.pfb><D:/mic
+tex/fonts/type1/public/cm-super/sfrm0800.pfb><D:/mictex/fonts/type1/public/cm-s
+uper/sfrm1095.pfb><D:/mictex/fonts/type1/public/cm-super/sfrm1440.pfb><D:/micte
+x/fonts/type1/public/newtx/txexs.pfb><D:/mictex/fonts/type1/public/newtx/txmiaX
+.pfb><D:/mictex/fonts/type1/public/newtx/txsym.pfb><D:/mictex/fonts/type1/publi
+c/newtx/txsys.pfb><D:/mictex/fonts/type1/public/newtx/ztmr.pfb>
+Output written on proba.pdf (21 pages, 4485032 bytes).
+PDF statistics:
+ 346 PDF objects out of 1000 (max. 8388607)
+ 43 named destinations out of 1000 (max. 500000)
+ 306 words of extra memory for PDF output out of 10000 (max. 10000000)
+
