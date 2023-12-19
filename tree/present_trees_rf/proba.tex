@@ -1,0 +1,532 @@
+% !TEX encoding = windows-1251
+% !TEX program = pdflatex
+\documentclass{beamer}
+\usepackage[english,russian]{babel}
+\usepackage[cp1251]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage{graphicx}
+
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+%\usepackage[center]{caption}
+%\usepackage{subfigure}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{bbm}
+\usepackage{mathrsfs}
+\usepackage{tikz}
+
+\usetikzlibrary{positioning}
+
+\newdimen\nodeSize
+\nodeSize=4mm
+\newdimen\nodeDist
+\nodeDist=6mm
+
+\tikzset{
+    position/.style args={#1:#2 from #3}{
+        at=(#3.#1), anchor=#1+180, shift=(#1:#2)
+    }
+}
+
+\definecolor{darkgreen}{rgb}{0.01, 0.75, 0.24}
+
+\setbeamertemplate{navigation symbols}{}
+
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\D}{D}
+\DeclareMathOperator{\E}{E}
+\newtheorem{theorema}{Теорема}
+\newtheorem{lemm}{Лемма}
+%\captionsetup[figure]{position=top}
+%\usepackage{floatrow}
+% Стиль презентации
+%\usetheme[numbers,totalnumbers]{StatMod}
+\usetheme[numbers,totalnumbers,minimal]{Statmod}
+\DeclareMathOperator*{\argmint}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\R}{\mathbb{R}}
+
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\title[Решающие деревья]{Решающие деревья. Random Forest.Композиция методов. Бустинг}  
+\author[ Морозов Никита, Романов Даниил.]{\vspace{0.5cm} \\
+            Морозов Никита\\
+            Романов Даниил             
+              \vspace{1.5cm}}
+
+\date{Санкт-Петербург\\ 2023 г.} 
+
+\begin{document}
+
+
+\begin{frame}
+  % создаём титульный лист
+  \maketitle
+\end{frame}
+
+\begin{frame}{Решающие деревья}
+\textbf{Решающее дерево} --- бинарное дерево, в котором  
+\begin{itemize}
+\item Каждой внутренней вершине $v$ задан предикат  $\beta_v : X \to \{0, 1\}$,
+\item Каждой листовой вершине  $v$ приписан прогноз $c_v\in Y$ или ($c_v\in \R^k,  \sum_{i=1}^{k} c_{vi} = 1 $).
+\end{itemize}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{bintree_class}
+\end{center}
+\caption{Бинарное решающее дерево для классификации на 5 классов и решающие поверхности порождаемых деревом}
+\label{fig:bin_tree}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Задачи решающих деревьев}
+Решающие деревья можно применять как для задач регрессии, так и для задач классификации.
+
+\vspace{0.2cm}
+Есть обучающая выборка $D=\{(x_1,y_1),(x_2,y_2)\ldots(x_n,y_n)\}$,где $x_i$---входные данные, $y_i$ --- известные ответы(метки классов, значение регрессии).
+
+
+\vspace{0.2cm}
+\begin{itemize}
+\item $y_i \in \{1,\ldots,K\} \Rightarrow$ задача классификации.\\
+\item $y_i \in \R \Rightarrow$ задача регрессии.
+\end{itemize}
+
+\end{frame}
+ 
+ \begin{frame}{Общий подход}
+ 	Для каждого объекта выборки $x$ начинаем из корня. Если $\beta_v(x)=1$ двигаемся вправо, если $\beta_v(x)=0$ то влево. Двигаемся пока не дойдем до листа и получим прогноз $c_v$ для объекта $x$.
+ 	\\\vspace{0.2cm} 
+ 	Предикат $\beta_v$ может иметь любую структуру, но обычно просто сравниваем с порогом $t \in \R$ по какому-то $j$-му признаку:
+ 	$\beta_v(x,j,t)=[x_j\leq t]$
+ 	
+ 		
+ \end{frame}
+\begin{frame}{Решающие деревья в задаче регрессии}
+ 
+Общая идея состоит в разбиении нашего пространства предикатов(множества возможных значений для $X_1\ldots X_p$) на $J$ различных и непересекающихся областей $R_1, R_2, \ldots, R_J$. Для каждого наблюдения попавшего в $R_j$, мы делаем такой же прогноз, который является средним значением ответа для обучающих наблюдений в $R_j$	
+
+\vspace{0.1cm} 
+Цель: найти такие прямоугольники $R_1,\ldots,R_J$ в которых минимизируется RSS:
+
+\begin{equation*}
+\sum_{j=1}^J\sum_{i\in R_j}(y_i - \hat{y}_{R_j})^2,
+\label{eq:RSS}
+\end{equation*}
+где $\hat{y}_{R_j}$ среднее ответов на обучающих наблюдения в j-м прямоугольнике
+
+\end{frame}
+
+\begin{frame}{Решающие деревья в задаче регрессии}
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{regressionpic}
+\end{center}
+\caption{Решающее дерево для регрессии}
+\label{fig:reg_tree}
+\end{figure}
+\end{frame}
+
+ 
+\begin{frame}{Решающие деревья в задаче классификации}
+Естественная альтернатива RSS для классификации --- коэффициент ошибок классификаций.
+$$E = 1 - \max_k(\hat{p}_{mk})$$
+где  $\hat{p}_{mk}$ --- доля объектов обучающей выборки класса $k$ попавших в $m$-область.
+%= \frac{1}{|R_j|}\sum\limits_{x_i \in R_j}\mathbbm{1}_{(y_i = k)}, \; j = 1,\ldots,J.$
+
+\vspace{0.1cm} 
+На практике чаще используют две других метрики:% (для фиксированного $j$)
+\begin{itemize}
+\item $G = \sum\limits_{k=1}^K \hat{p}_{mk}(1-\hat{p}_{mk})$ --- индекс Джини,
+\item $D = -\sum\limits_{k=1}^K\hat{p}_{mk}\log\hat{p}_{mk}$ --- коэффициент перекрёстной энтропии,
+\end{itemize}
+
+\vspace{0.1cm} 
+Предсказание для объекта $x$:
+$$f(x) = \argmax\limits_{k \in Y}\hat{p}_{jk}.$$
+\end{frame}
+
+
+\begin{frame}{Решающие деревья в задаче классификации}
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{entr.png}
+\end{center}
+\caption{Информационные индексы для двухклассовой классовой классификации, как функция от пропорции $p$ для класса 2.}
+\label{fig:reg_treeent}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Решающие деревья в задаче классификации}
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.55\linewidth]{class_tree1}
+\end{center}
+\caption{Использование решающих деревьев в задачах классификации}
+\label{fig:class_tree}
+\end{figure}
+
+\end{frame}
+\begin{frame}{Решающие деревья в задаче классификации}
+	\begin{figure}[!h]
+		\begin{center}
+			\includegraphics[width=0.55\linewidth]{classtreeover}
+		\end{center}
+		\caption{Переобученное решающее дерево для классификации}
+		\label{fig:class_treeover}
+	\end{figure}
+\end{frame}
+
+
+\begin{frame}{Обучение деревьев(CART)}
+
+\begin{enumerate}
+\item Выбираем признак $j$ и порог $s$ так, чтобы разбиение $X^{(n)}$ на $R_1(j,s) = \{x \in X^{(n)} | X_j <s\}$ и $R_2(j,s) = \{x \in X^{(n)} | X_j \ge s\}$ решало задачу:
+$$\sum\limits_{i: x_i \in R_1(j,s)}\left(y_i - \hat{y}_{R_1}\right)^2 + \sum\limits_{i: x_i \in R_2(j,s)}\left(y_i - \hat{y}_{R_2}\right)^2 \to \min\limits_{j,s},$$
+где $\hat{y}_{R_l} =\frac{1}{|R_l|}\sum\limits_{i: x_i \in R_l(j,s)}y_i,\quad l = 1,2$.
+
+\item Разбиваем выборку на области $R_1$ и $R_2$, образуя две дочерние вершины.
+\item Повторяем процедуру в пределах каждой получаемой области, пока не выполнится критерий остановки.
+\end{enumerate}
+На выходе получаем дерево, в каждом из листов которого содержится по крайней мере $1$ объект исходной выборки $X^n$.
+\end{frame}
+\begin{frame}{Обучение деревьев(IDE3)}
+\begin{enumerate}
+	\item $\textbf{X}$ --- обучающая выборка, $\textbf{y} \in \{1, \cdots, k\}$.
+	\item Если все $\textbf{x}_i$ имеют класс $k$, ставим метку 1 в корень и выходим из цикла.
+	\item Если ни один $\textbf{x}_i$ не имеет класс $k$, ставим метку 0 в корень и выходим из цикла.
+	\item Предикат $R(\textbf{x}_i):=\{ \textbf{x}_i | X_j \lessgtr s_j \}$ для которого информационная выгода наибольшая.
+	\item Разбиваем $\textbf{X}$ на $\textbf{X}_0$ и $\textbf{X}_1$ по предикату $R$
+	$$\textbf{X}_0:=\{ \textbf{x}_i \in \textbf{X}:R(\textbf{x}_i) = 0 \},$$
+	$$\textbf{X}_1:=\{ \textbf{x}_i \in \textbf{X}:R(\textbf{x}_i) = 1 \}.$$
+	\item Если $\textbf{X}_0 = \varnothing$ или $\textbf{X}_1 = \varnothing$, создаем новый лист $v$, $k_v$ --- класс, в котором находится большинство элементов $\textbf{x}_i.$
+	\item Иначе создаем внутреннюю вершину $v$:
+	\begin{enumerate}
+		\item $R_v = R$;
+		\item $L_v$;
+		\item $R_v$.
+	\end{enumerate}
+\end{enumerate}
+\end{frame}
+\begin{frame}{Сравнение алгоритмов}		
+	\begin{enumerate}
+		\item \textbf{Тип задач:} 
+		\textbf{ID3:} Классификация. 
+		\textbf{CART:} Классификация и регрессия.
+		
+		\item \textbf{Критерий разбиения:} 
+		\textbf{ID3:} Энтропия. 
+		\textbf{CART:} Индекс Джини (классификация) и среднеквадратичная ошибка (регрессия).
+		
+		\item \textbf{Тип разбиения:} 
+		\textbf{ID3:} Многоразовое. 
+		\textbf{CART:} Бинарное.
+		
+		\item \textbf{Устойчивость к выбросам:} 
+		\textbf{ID3:} Чувствителен. 
+		\textbf{CART:} Более устойчив.
+		
+		\item \textbf{Типы признаков:} 
+		\textbf{ID3:} Категориальные. 
+		\textbf{CART:} Категориальные и числовые.
+		
+		\item \textbf{Критерии останова:} 
+		\textbf{ID3:} Глубина, полное разбиение. 
+		\textbf{CART:} Глубина, минимум объектов в листе.
+		
+		\item \textbf{Сложность модели:} 
+		\textbf{ID3:} Более сложные. 
+		\textbf{CART:} Более простые (бинарная структура).
+	\end{enumerate}
+		
+\end{frame}
+\begin{frame}{Критерии остановки}
+\begin{itemize}
+\item Ограничение максимальной глубины дерева.
+\item Ограничение минимального числа объектов в листе .
+\item Ограничение максимального количества листьев в дереве.
+\item Остановка в случае, если изменение метрики меньше порога.
+\item Остановка в случае, если все объекты относятся к 1 классу
+\end{itemize}
+\vspace{0.3cm}
+Оба метода основаны на жадных подходах(решение лишь
+оптимально локальное).
+\end{frame}
+
+\begin{frame}{Стрижка деревьев (pruning tree)}
+\begin{itemize}
+\item
+\textbf{Проблема:} переобучение --- небольшое смещение, но большая дисперсия.
+\item
+\textbf{Решение:} пожертвовать смещением, но получить меньшую дисперсию
+\item
+Выращиваем дерево только до тех пор, пока уменьшение RSS из-за разбиения превышает некоторый(высокий) порог.
+\item
+Однако таким образом можно пропустить хорошее разбиение, остановившись слишком рано. Поэтому можно выращивать большие деревья $T_0$, а затем обрезать его, для получения поддерева.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Сost complexity pruning}
+\begin{itemize}
+\item
+
+Получим большое дерево $T_0$ и обрежем его в узле $t$, получив поддерево $T^t \subset T_0 $.
+\item
+Рассмотрим последовательность деревьев проиндексированных положительным параметром  $\alpha$.
+Каждому $\alpha$ соответствует поддерево $T \subset T_0 $, минимизирующее критерий
+$$Q_{\alpha}(T) = Q(T) + \alpha|l(T)|,$$
+где $Q(T)$ --- training error,  $\alpha \ge 0$, $|l(T)|$ --- число листьев в поддереве $T$.
+\item
+Выберем $\alpha$ с помощью кросс-валидации и возьмём соответствующее поддерево.
+\end{itemize}
+\end{frame}
+
+
+%\begin{frame}{Сравнение деревьев с линейными моделями}
+%Модель линейной регрессии:
+%\begin{equation}
+%f(X) = \beta_0 + \sum\limits_{j=1}^pX_j\beta_j.
+%\label{eq:lin_model}
+%\end{equation}
+%Модель регрессионного дерева:
+%\begin{equation}
+%f(X) = \sum_{j=1}^Jc_j\mathbbm{1}_{(X \in R_j)}.
+%\label{eq:tree_model}
+%\end{equation}
+%Если зависимость между  $X_1, \ldots, X_p$ и  $Y$ приближённо можно считать линейной, то лучше использовать \eqref{eq:lin_model}, а в случае сложной нелинейной зависимости используем \eqref{eq:tree_model}.
+%\end{frame}
+\begin{frame}{Сравнение деревьев с линейными моделями}
+	Из определения, решающее дерево разбивает все пространство
+	признаков на некоторое количество непересекающихся
+	подмножеств $\{R_1, \ldots, R_n\}$, и в каждом подмножестве выдает
+	константный прогноз $c_j$.
+	
+	Модель регрессионного дерева:
+	\[ f(X) = \sum_{j=1}^{n} c_j [X \in R_j]. \]
+	
+	По сути, она является линейной моделью над признаками
+	\[ \left([X \in R_j]\right)_{j=1}^{n}. \]
+\end{frame}
+\begin{frame}{Сравнение деревьев с линейными моделями}
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.6\linewidth]{linreg_vs_tree}
+\end{center}
+\caption{Примеры решений задач классификации с линейной (верхний ряд) и нелинейной (нижний ряд) зависимостью. В левой части решение с помощью линейной модели, в правой --- с помощью  решающего дерева.}
+\label{fig:linreg_vs_tree}
+\end{figure}
+\end{frame}
+\begin{frame}{Вероятностная постановка задачи}
+\textbf{	Генеральная постановка задачи:\\}	
+	Предполагаем, что $\eta$ и $\xi$ функционально зависимы:
+	
+					
+			$$\eta = \varphi(\xi) + \varepsilon,$$
+			
+
+	
+	$\varphi$ --- неизвестная функция.\\
+	$\eta \in \mathbb{R}$ --- случайная величина, зависимая переменная.\\
+	$\xi \in \mathbb{R}^p$ --- случайный вектор, признаки.\\
+	$\varepsilon \in \mathbb{R}$ --- случайная величина, ошибка.\\
+	
+
+		\textbf{Выборочная постановка}
+
+	
+	
+			
+			$$y_i = \varphi(\textbf{x}_i) + \varepsilon_i,$$
+			
+
+	
+	\noindent$\varphi$ --- неизвестная функция.\\
+	$y_i$ --- реализация случайной величины $\eta$, зависимая переменная.\\
+	$\textbf{x}_i$ --- реализация случайного вектора $\xi$, признаки.\\
+	$\varepsilon_i \in \mathbb{R}$ --- реализация случайной величины $\varepsilon$, ошибка.\\
+	
+\end{frame}
+
+\begin{frame}{Преимущества и недостатки решающих деревьев}
+Преимущества:
+\begin{itemize}
+\item  Простота интерпретации
+\item  Пригодность и для задач регрессии, и для задач классификации
+\item  Возможность работы с пропусками в данных
+\item Возможность работы с категориальными значениями
+\end{itemize}
+Недостатки:
+\begin{itemize}
+\item Основан на <<жадном>> алгоритме (решение является лишь локально оптимальным)
+\item Метод явялется неустойчивым и склонным к переобучению
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Bootstrap}
+	
+	\begin{itemize}
+		\item Дано $\mathbf{X} \in \mathbb{R}^{n\times p}$ --- набор данных, $\mathbf{Y}\in \mathbb{R}^{n}$ --- зависимые переменные,    $X = (x_i,y_i)$. 
+		\item Возьмем $l$ объектов с возвращениями --- $X_1$
+		\item Повторим $N$ раз --- $X_1,\ldots,X_N$
+		\item Обучим по каждой выборке модель линейной регрессии и получим базовые алгоритмы $b_1(x),\ldots,b_N(x)$
+		\item Предположим, что существует модель $y(x) = \sum \beta_i x_i + \varepsilon_i $ и $p(x)$ --- распределение  $\mathbf{X}$ .
+		\item Ошибка регрессии: $\varepsilon_j(x)=b_j(x)-y(x),\; \; j = 1,...,N.$
+		\item $\mathbb{E}_x\varepsilon^2_j(x) = \mathbb{E}_x\left(b_j(x) - y(x)\right)^2 $
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}{Среднеквадратичная ошибка}
+	
+	Средняя ошибка построенных функций регрессии: 
+	$$E_1 =  \dfrac{1}{N}\sum_{j=1}^{N}\mathbb{E}_x\epsilon^2_j(x)$$
+	
+	
+	Пусть 
+	\begin{itemize}
+		\item$\mathbb{E}_x\epsilon_j(x) = 0$  и $ \mathbb{E}_x\epsilon_i(x)\epsilon_j(x) = 0$,  $i\neq j$	
+		\item $a(x) = \frac{1}{N}\sum_{j=1}^{N}b_j(x)$ 
+	\end{itemize}
+
+	\vspace{0.1cm}
+	 
+	Тогда 
+	
+	$$E_N = \mathbb{E}_x\left(\frac{1}{N}\sum_{j=1}^{N}b_j(x)-y(x)\right)^2 = \mathbb{E}_x\left(\frac{1}{N}\sum_{j=1}^{N}\epsilon_j(x)\right)^2 = $$
+	
+	$$=\frac{1}{N^2}\mathbb{E}_x\left(\sum_{j=1}^{N}\epsilon^2_j(x) + \sum_{i\neq j}^{}\epsilon_i(x)\epsilon_j(x)\right)=\frac{1}{N}E_1$$
+	
+\end{frame}
+
+
+\begin{frame}{Bias-Variance decomposition}
+	
+	
+	Пусть задана выборка $X = (x_i,y_i)^l_{i=1}$ с ответами $y_i \in \mathbb{R}$ и $\exists p(x,y)$
+	
+	
+	\vspace{0.1cm}
+	
+	
+	Рассмотрим $L(y,a) = (y-a(x))^2$ --- функция потерь,
+	
+	
+	\vspace{0.1cm}
+	
+	
+	и $R(a) = \mathbb{E}_{x,y}\left[(y-a(x))^2\right] \int_{\mathbb{X}}\int_{\mathbb{Y}} p(x,y)(y-a(x))^2dxdy$ --- ее среднеквадратичный риск.
+	
+\end{frame}
+
+
+\begin{frame}{Ошибка метода обучения}
+	
+	Метод обучения $$\mu : (\mathbb{X}\times\mathbb{Y})^l \rightarrow \mathbf{A}$$
+	
+	\begin{equation}
+			L(\mu) = \mathbb{E}_X\left[\mathbb{E}_{x,y}\left[ \left(y-\mu(X)(x))\right)^2\right]\right] 
+	\end{equation}
+	
+	
+	Среднеквадратичный риск на фиксированной выборке $X$
+	$$\mathbb{E}_{x,y} \left[(y-\mu(X))^2\right] = \mathbb{E}_{x,y}\left[(y-\mathbb{E}[y|x])^2\right] + \mathbb{E}_{x,y}\left[(\mathbb{E}[y|x] - \mu(X))^2\right]$$
+	
+	Подставим это в формулу (1).
+	
+\end{frame}
+
+
+\begin{frame}{Ошибка метода обучения}
+	
+	\begin{equation}
+		\begin{split}
+			&L(\mu) = \mathbb{E}_X\left[\underbrace{\mathbb{E}_{x,y}\left[(y-\mathbb{E}[y|x])^2\right]}_{\text{не зависит от X}} + \mathbb{E}_{x,y}\left[(\mathbb{E}[y|x] - \mu(X))^2\right]\right] = \\
+			&= \mathbb{E}_{x,y}\left[(y-\mathbb{E}[y|x])^2\right] + \mathbb{E}_{x,y}\left[\mathbb{E}_X \left[(\mathbb{E}[y|x]- \mu(X))^2\right]\right]
+		\end{split}
+		\label{2.2}
+	\end{equation}
+	
+	Преобразовываем второе слагаемое:
+	\begin{equation}
+		\begin{aligned}
+			&\mathbb{E}_{x,y}\left[\mathbb{E}_X \left[(\mathbb{E}[y|x] - \mu(X))^2\right]\right] = \\ 
+			&= \mathbb{E}_{x,y}\left[\mathbb{E}_X \left[(\mathbb{E}[y|x] - \mathbb{E}_X[\mu(X)] + \mathbb{E}_X[\mu(X)] -\mu(X))^2\right]\right] = \\
+			&=
+			\mathbb{E}_{x,y}\left[\mathbb{E}_X \left[\underbrace{(\mathbb{E}[y|x] - \mathbb{E}_X \mu(X))^2}_{\text{не зависит от X}}\right]\right] + \mathbb{E}_{x,y}\left[\mathbb{E}_X \left[(\mathbb{E}_X \mu(X) - \mu(X))^2\right]\right] + \\ 
+			&+ 
+			2\mathbb{E}_{x,y} \left[\mathbb{E}_X\left[(\mathbb{E}[y|x] - \mathbb{E}_X[\mu(X)])(\mathbb{E}_X[\mu(X)]-\mu(X))\right]\right]
+			\label{2.3}
+		\end{aligned}
+	\end{equation}
+		
+\end{frame}
+
+
+\begin{frame}{Bias-Variance decomposition}
+	
+	Подставим (\ref{2.3}) в (\ref{2.2}).
+	\begin{gather}
+		L(\mu) = \underbrace{\mathbb{E}_{x,y}\left[(y-\mathbb{E}[y|x]^2)\right]}_{\text{шум}} + \\ +
+		\underbrace{\mathbb{E}_x\left[\mathbb{E}_X[\mu(X)] - \mathbb{E}[y|x]\right]}_{\text{смещение}} + \underbrace{\mathbb{E}_x\left[\mathbb{E}_X\left[(\mu(X) - \mathbb{E}_X[\mu(X)])^2\right]\right]}_{\text{разброс}}
+		\label{2.4}
+	\end{gather}
+\end{frame}
+
+\begin{frame}{Bagging}
+\textbf{Цель:} уменьшение дисперсии модели с сохранением низкого смещения.
+
+\vspace{0.15cm}
+\textbf{Идея:}  пусть $\xi_1, \ldots,\xi_n$ --- н.о.р.с.в., $\D \xi_i =\sigma^2$, тогда $\D \bar{\xi} = \frac{\sigma^2}{n}$.
+
+\vspace{0.15cm}
+\textbf{Реализация:}
+
+$X^n =  (x_i,y_i)_{i=1}^n$ --- обучающая выборка.
+\begin{itemize}
+\item  $B$ бутстреп-выборок (с возвращением) $X_b^{*n}, \quad b = 1, \ldots, B$,
+\item $B$ решающих деревьев $\{T_b\}_{b = 1}^B$,
+\item находим оценку:
+\begin{itemize}
+\item в задаче регрессии $\hat{f}_{bag}(x) = \frac{1}{B}\sum\limits_{b=1}^BT_b(x)$,
+\item в задаче классификации с $K$ классами: 
+записываем класс предсказанный каждым деревом, итоговое предсказание --- самый часто встречающийся класс среди предсказаний.
+%$\hat{f}_{bag}(x) = [p_1(x), \ldots, p_K(x)]$ --- $K$-мерный вектор, где $p_k(x)$ --- доля деревьев, предсказавших класс $k$ для $x$ 
+%(в качестве предсказания берём $\argmax\limits_k\hat{f}_{bag}(x)$).
+%(в качестве предсказания берём $majority\; vote\{\hat{f}_b(x)\}_{b=1}^B$, где $\hat{f}_b(x)$ --- предсказание класса $b$-м решающим деревом.)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Оценка ошибки out-of-bag}
+\begin{itemize}
+\item
+Дерево, обученное по бутстреп-выборке, использует в среднем $2/3$ наблюдений.
+\item
+Оставшуюся $1/3$ выборки называют \textit{out-of-bag} наблюдениями.
+\item
+Те деревья, у которых $i$-ое наблюдение out-of-bag, могут использоваться для предсказания на $i$. 
+Таким образом можно получить примерно $B/3$ предсказаний.
+\item
+В результате получаем способ тестирования bagged модели прямо на обучающей выборке.
+\end{itemize}
+\end{frame}
+
+
+
+\end{document}

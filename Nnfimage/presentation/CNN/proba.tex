@@ -1,0 +1,388 @@
+% !TEX encoding = windows-1251
+% !TEX program = pdflatex
+\documentclass{beamer}
+\usepackage[english,russian]{babel}
+\usepackage[cp1251]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage{graphicx}
+
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+%\usepackage[center]{caption}
+%\usepackage{subfigure}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{bbm}
+\usepackage{mathrsfs}
+\usepackage{tikz}
+\usepackage{newtxtext,newtxmath}
+\usepackage{animate}
+\usetikzlibrary{positioning}
+
+\newdimen\nodeSize
+\nodeSize=4mm
+\newdimen\nodeDist
+\nodeDist=6mm
+
+\tikzset{
+    position/.style args={#1:#2 from #3}{
+        at=(#3.#1), anchor=#1+180, shift=(#1:#2)
+    }
+}
+
+\definecolor{darkgreen}{rgb}{0.01, 0.75, 0.24}
+
+\setbeamertemplate{navigation symbols}{}
+
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\D}{D}
+\DeclareMathOperator{\E}{E}
+\newtheorem{theorema}{Теорема}
+\newtheorem{lemm}{Лемма}
+%\captionsetup[figure]{position=top}
+%\usepackage{floatrow}
+% Стиль презентации
+%\usetheme[numbers,totalnumbers]{StatMod}
+\usetheme[numbers,totalnumbers,minimal]{Statmod}
+\DeclareMathOperator*{\argmint}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\R}{\mathbb{R}}
+
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+
+\title[Deep learning, Neural Nets for images]{Deep learning, Neural Nets for images}  
+\author[Н. Морозов, Д. Романов]{\vspace{0.5cm} \\
+             Морозов Никита \\
+             Романов Даниил
+              \vspace{1.5cm}}
+
+    
+\date{Санкт-Петербург\\ 2023 г.} 
+
+\begin{document}
+
+
+\begin{frame}
+  % создаём титульный лист
+  \maketitle
+\end{frame}
+
+\begin{frame}{CNN}
+	\begin{definition}
+		Изображение~--- тензор $M\in\mathbb R^{m\times n\times d}$, $m$~--- ширина изображения, $n$~--- длина. Чаще всего $d=3$ (3 канала~--- Red, Green, Blue).
+	\end{definition}
+	Пусть $X \in\mathbb R^{m\times n\times d}$~--- случайная величина "изображение".
+	
+	Задачи:
+	\begin{itemize}
+		\item Классификация $f:X\to\{1,\ldots,K\}$, $K$~--- число классов
+		\item Сегментация $f:X\to Y$, $Y\in[0,1]^{m\times n}$, $Y_{ij}=\Prob(X_{ij}\in\text{segment})$		
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Сверточный слой нейронов}
+	$x[i,j]$ -- исходные признаки, пиксели $n\times m$ изображения\\
+	$\text{w}_{ab}$ -- ядро свертки, $ a=-A,\ldots,+A, b= -B,\ldots, +B$
+	Неполносвязный свёрточный нейрон с $(2A+1)(2B+1)$ весами:
+	\begin{equation*}
+		(x*\text{w})[i,j]=\sum_{a=-A}^{A}\sum_{b=-B}^{B}\text{w}_{a,b}x[i+a,j+b]
+	\end{equation*}
+	\includegraphics[width=\textwidth]{cnn.png}
+\end{frame}
+
+\begin{frame}{Пример свертки }
+	\includegraphics[width=0.9\textwidth]{pollingexample.png}
+\end{frame}
+\begin{frame}{Pooling слой нейронов}
+	Объединяющий нейрон -- это необучаемая свертка с шагом $h>1$, агрегирующая данные прямоугольной области $h\times h$:
+	\begin{equation*}
+		y[i,j]=F(x[h_i,h_j],\ldots,x[h_i+h-1,h_j+h-1]),
+	\end{equation*}
+	где F -- агрегирущая функция: max,average,min.\\
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{pooling.png}
+	\end{center}
+\end{frame}
+\begin{frame}{Схема сверточной сети}
+\includegraphics[width=1.1\textwidth]{cnnexample.png}
+\end{frame}
+\begin{frame}{Уменьшение размерности при помощи CNN}
+	\includegraphics[width=\textwidth]{demension.png}
+\end{frame}
+
+\begin{frame}{ImageNet}
+	\includegraphics[width=\textwidth]{ImageNet.png}
+\end{frame}
+
+\begin{frame}{Частые приемы в CNN}
+	\begin{itemize}
+		\item Подбор числа слоёв и их размерности 
+		\item Dropout
+		\item batch normalization
+		\item augmentation
+	\end{itemize}
+\end{frame}
+\begin{frame}{Augumentation}
+	\begin{definition}
+		Аугументация (Augumentation)~--- увеличение объёма тренировочной выборки с помощью различных афинных преобразований изображений: зеркальное отражение, поворот, сдвиг, изменение масштаба.
+	\end{definition}
+	Используется для борьбы с переобучением.
+	\begin{center}
+	
+
+	\includegraphics[width=0.6\textwidth]{aug.png}
+	\end{center}
+\end{frame}
+\begin{frame}{Dropout}
+	\begin{definition}
+		Dropout~--- отключение (зануление) случайных нейронов во время обучения нейросети. Параметр $p$~--- доля отключаемых нейронов. Оставшимся ненулевым нейронам присваиваем вес, равный $\frac1{1-p}$. 
+	\end{definition}
+	Цель: борьба с переобучением
+	\includegraphics[width=0.9\textwidth]{drop.png}
+\end{frame}
+\begin{frame}{Применение CNN для аудиофайлов}
+	Последовательные фрагменты сигнала представляются векторами спектрального разложения
+	\includegraphics[width=\textwidth]{sound.png}
+	
+\end{frame}
+\begin{frame}{Спектрограмма}
+	\includegraphics[width=\textwidth]{spec.png}
+\end{frame}
+\begin{frame}{CNN для обработки текста}
+	Последовательные слова в тексте представляются векторами с помощью векторных представлений(fastText, word2vec, One-hot encoding и тд.)
+	\includegraphics[width=\textwidth]{nlp.png}
+\end{frame}
+
+\begin{frame}{word2vec}
+	\includegraphics[width=\textwidth]{king.png}
+	\includegraphics[width=\textwidth]{quin.png}
+\end{frame}
+\begin{frame}{Обобщение идеи}
+	\includegraphics[width=\textwidth]{all.png}
+\end{frame}
+\begin{frame}{Практические проблемы}
+	Проблемы:
+		\begin{itemize}
+			\item Необходимость разметки данных для обучения
+			\item Большое количество параметров, следовательно долгое обучение, даже на GPU
+		\end{itemize}
+	Решения:
+		\begin{itemize}
+			\item Использование размеченных библиотек изображений: Imagenet (14M изображений, 1000 категорий), OpenImages (9М изображений, 60К меток, 20К категория)
+			\item Использование предобученной модели (Alexnet, vgg net, Resnet) 
+		\end{itemize}
+\end{frame}
+
+\begin{frame}{Напоминание про функции активации}
+	\includegraphics[width=\textwidth]{relu.png}
+	Мертвые нейроны -- ситуация, когда входной сигнал $\leq 0$.В результате некоторые нейроны становятся неактивными и не будут участвовать в обработке данных.
+\end{frame}
+\begin{frame}{AlexNet}
+	\includegraphics[width=\textwidth]{AlexNet.png}
+\end{frame}
+
+\begin{frame}{Unet}
+	\includegraphics[width=\textwidth]{unet.jpg}
+\end{frame}
+
+\begin{frame}{vgg16}
+	\includegraphics[width=\textwidth]{vgg16.png}
+\end{frame}
+\begin{frame}{GAN --- Генеративная состязательная сеть}
+	
+	\includegraphics[width=\textwidth]{img/gan_1.png}
+	$G(z)$ -  генеративная модель, которая строит приближение распределения данных.
+	
+	$D(x)$ - и дискриминативная модель, оценивающая вероятность, что образец пришел из тренировочных данных, а не сгенерированных моделью $G$.
+	
+\end{frame}
+
+
+	\begin{frame}{GAN --- Для чего нужен}
+	На высоком уровне GAN — это нейронные сети, которые учатся генерировать реалистичные образцы данных, на которых они обучались. Например, имея фотографии рукописных цифр, GAN узнают, как создавать реалистичные фотографии большего количества рукописных цифр.
+	\animategraphics[autoplay, loop, width=\textwidth]{12}{img/sus-}{0}{99}
+\end{frame}
+
+\begin{frame}{GAN --- Структура}
+	\begin{figure}
+		\includegraphics[width=\textwidth]{img/gan_arc.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{GAN. Генератор}
+	В GAN генератор — это нейронная сеть, которая изучает базовое распределение данных. Чтобы быть более конкретным, генератор принимает в качестве входных данных случайное распределение (также известное как «шум» в литературе по GAN) и изучает функцию отображения, которая отображает входные данные в желаемый результат, который является фактическим базовым распределением данных.
+	
+	\begin{figure}
+		\includegraphics[width=\textwidth]{img/genrator_main.png}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}{GAN. пример шума}
+	
+	\animategraphics[autoplay, loop, width=\textwidth]{46}{img/example-}{0}{243}
+	
+\end{frame}
+
+
+
+\begin{frame}{GAN. Дискриминатор}
+	Роль дискриминатора состоит в оценке качества выходных изображений генератора. Технически дискриминатор представляет собой двоичный классификатор. Он принимает изображения в качестве входных данных и выводит вероятность того, что изображение является реальным (т. е. фактическим тренировочным изображением) или фальшивым (т. е. полученным от генератора).
+	
+	\animategraphics[autoplay, loop, width=\textwidth]{25}{img/disc-}{0}{249}
+\end{frame}
+
+
+\begin{frame}{Постановка задачи}
+	\begin{itemize}
+		\item $X \in \mathbb{R}$ --- Набор данных;
+		
+		\item $p_g$ --- Вероятностное распределение генератора;
+		
+		\item $p_z(z)$ --- Априорная вероятность шума;
+		
+		\item $G(z,\gamma_g)$ --- Генератор, где $G$ многослойный перцептроном с параметром $\gamma_g$;
+		
+		\item $D(z,\gamma_d)$ --- Дискриминатор, который на выход подает вероятность того, что $x$ пришло из тренировочных данных, а не $p_g$.
+	\end{itemize}
+	
+	Задача:
+	
+	$$\underset{G}{\min} \underset{D}{\max} V\left(D,G\right) = \underset{x\sim p_{data}}{ \mathbb{E}} \left[\log D(x)\right] + \underset{z\sim p_z}{ \mathbb{E}} \left[\log\left(1-D\left(G(z)\right)\right)\right]$$
+	
+\end{frame}
+
+\begin{frame}[fragile]{Алгоритм обучения}
+	
+	\begin{enumerate}
+		\item Получаем мини-батч ${z_1,...,z_m}$ из распределения $p_z$,
+		\item Получаем мини-батч ${x_1,...,x_m}$ из распределения $p_{data}$
+		\item Обновляем дискриминатор в сторону возрастания его градиента $$ d_w \leftarrow \nabla_{\gamma_d} \frac{1}{m} \sum\limits_{t=1}^{m}\left[\log D(x_t)\right] +  \left[\log\left(1-D\left(G(z_t)\right)\right)\right]$$
+		\item Повторяем шаги 1-3 $k$ раз.
+		\item Получаем мини-батч ${z_1,...,z_m}$ из распределения $p_z$
+		\item Обновляем генератор в сторону убывания его градиента $$ g_w \leftarrow \nabla_{\gamma_d} \frac{1}{m} \sum\limits_{t=1}^{m} \left[\log\left(1-D\left(G(z_t)\right)\right)\right] $$ 
+	\end{enumerate}
+	
+\end{frame}
+
+\begin{frame}{обучение GAN}	
+	\begin{figure}
+		\includegraphics[width=\textwidth]{img/train.jpg}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Проблемы обучения GAN}
+	\begin{itemize}
+		\item Генератор  выдает ограниченное количество разных образцов.
+		\item Параметры модели дестабилизируются и не сходятся.
+		\item Дискриминатор становится слишком сильным, а градиент генератора исчезает и обучение не происходит.
+		\item Выявление корреляции в признаках, не связанных (слабо связанных) в реальном мире.
+		\item Высокая чувствительность к гиперпараметрам.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{пример работы GAN}	
+	\begin{figure}
+		\includegraphics[width=0.7\textwidth]{img/pic_ex.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{типы GAN}	
+	\begin{figure}
+		\includegraphics[width=\textwidth]{img/gan_types.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{CGAN}
+	
+	$y$ --- Дополнительное условие для генератора и дискриминатора (Метка класса, изображение или данные из других моделей)
+	
+	$$\underset{G}{\min} \underset{D}{\max} V\left(D,G\right) = \underset{x\sim p_{data}}{ \mathbb{E}} \left[\log D(x|y)\right] + \underset{z\sim p_z}{ \mathbb{E}} \left[\log\left(1-D\left(G(z|y)\right)\right)\right]$$
+	
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{img/cgan.png}
+	\end{center}
+	
+\end{frame}
+
+\begin{frame}{CGAN}
+	
+	\begin{center}
+		\includegraphics[width=\textwidth]{img/CGANv2.png}
+	\end{center}
+	
+\end{frame}
+
+
+
+\begin{frame}{ControlGAN - Controllable Generative Adversarial Networks}
+	Контролируемые порождающие состязательные сети --- модифицированная версия алгоритма GAN, состоящая из трех нейронных сетей: генератор, дискриминатор, классификатор.
+	
+	ControlGAN минимизирует следующие уравнения:
+	
+	$\theta_D = argmin{\alpha L_D(t_D,D(x;\theta_D))+(1-\theta)L_D((1-t_D),D(G(z,l;\theta_G);\theta_D))}$,
+	
+	$\theta_G = argmin{\gamma_tL_C(l,G(z,l;\theta_G))+L_D(t_D,D(G(z,l;\theta_G);\theta_D)}$,
+	
+	$\theta_C = argmin{L_C(l,x;\theta_C)}$.
+	
+	$t_D$ --- метка для генератора, $\alpha$ --- параметр для дискриминатора, $\gamma_t$ --- параметр, который определяет, насколько генератор ориентирован на входные метки для генератора, $l$ ---  бинарные метки образца $x$ которые являются входными данными для генератора.
+\end{frame}
+
+\begin{frame}{ControlGAN}
+	$E$ --- отношение между ошибками классификации сгенерированных образцов и изначальных данных. Для тренировки генератора используем оценочное значение $\hat{E}$, полученное, использующее классификатор и генератор из сети. При значении $\hat{E}$ меньше 1, генератор обучается на входных данных, иначе обучается генерировать образцы. С помощью этого параметра ControlGAN управляет, чему из вышеперечисленного обучаться. Сам параметр поддерживает постоянной отношение между ошибками.
+	\\
+	$E = {L_C(l,G(z,l;\theta_G) \over L_C(l,x)}$
+	
+	$\gamma_t=\gamma_{t-1}+r{L_C(l,G(z,l;\theta_G))-\hat{E}L_C(l,x)}$
+	
+	$r$ --- коэффициент обучения $\gamma_t$
+	
+\end{frame}
+
+\begin{frame}{ControlGAN}
+	
+	\begin{center}
+		\includegraphics[width=1\textwidth]{img/controlgan.png}
+	\end{center}
+	
+\end{frame}
+
+\begin{frame}{Примеры}
+	
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{img/wrkg.png}
+	\end{center}
+	
+\end{frame}
+
+\begin{frame}{Примеры}
+	
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{img/heheh.png}
+	\end{center}
+	
+\end{frame}
+
+\begin{frame}{Примеры}
+	
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{img/gnex.png}
+	\end{center}
+	
+\end{frame}
+
+
+\end{document}
