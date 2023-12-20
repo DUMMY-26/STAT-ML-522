@@ -1,0 +1,205 @@
+% !TEX encoding = windows-1251
+% !TEX program = pdflatex
+\documentclass{beamer}
+\usepackage[english,russian]{babel}
+\usepackage[cp1251]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage{graphicx}
+
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+%\usepackage[center]{caption}
+%\usepackage{subfigure}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{bbm}
+\usepackage{mathrsfs}
+\usepackage{tikz}
+\usepackage{newtxtext,newtxmath}
+\usepackage{animate}
+\usetikzlibrary{positioning}
+
+\newdimen\nodeSize
+\nodeSize=4mm
+\newdimen\nodeDist
+\nodeDist=6mm
+
+\tikzset{
+    position/.style args={#1:#2 from #3}{
+        at=(#3.#1), anchor=#1+180, shift=(#1:#2)
+    }
+}
+
+\definecolor{darkgreen}{rgb}{0.01, 0.75, 0.24}
+
+\setbeamertemplate{navigation symbols}{}
+
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\D}{D}
+\DeclareMathOperator{\E}{E}
+\newtheorem{theorema}{Теорема}
+\newtheorem{lemm}{Лемма}
+%\captionsetup[figure]{position=top}
+%\usepackage{floatrow}
+% Стиль презентации
+%\usetheme[numbers,totalnumbers]{StatMod}
+\usetheme[numbers,totalnumbers,minimal]{Statmod}
+\DeclareMathOperator*{\argmint}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\R}{\mathbb{R}}
+
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+
+\title[Deep learning, Neural Nets for images]{Deep learning, Neural Nets for images}  
+\author[Н. Морозов, Д. Романов]{\vspace{0.5cm} \\
+             Морозов Никита \\
+             Романов Даниил
+              \vspace{1.5cm}}
+
+    
+\date{Санкт-Петербург\\ 2023 г.} 
+
+\begin{document}
+
+
+\begin{frame}
+  % создаём титульный лист
+  \maketitle
+\end{frame}
+
+\begin{frame}{CNN}
+	\begin{definition}
+		Изображение~--- тензор $M\in\mathbb R^{m\times n\times d}$, $m$~--- ширина изображения, $n$~--- длина. Чаще всего $d=3$ (3 канала~--- Red, Green, Blue).
+	\end{definition}
+	Пусть $X \in\mathbb R^{m\times n\times d}$~--- случайная величина "изображение".
+	
+	Задачи:
+	\begin{itemize}
+		\item Классификация $f:X\to\{1,\ldots,K\}$, $K$~--- число классов
+		\item Сегментация $f:X\to Y$, $Y\in[0,1]^{m\times n}$, $Y_{ij}=\Prob(X_{ij}\in\text{segment})$		
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Сверточный слой нейронов}
+	$x[i,j]$ -- исходные признаки, пиксели $n\times m$ изображения\\
+	$\text{w}_{ab}$ -- ядро свертки, $ a=-A,\ldots,+A, b= -B,\ldots, +B$
+	Неполносвязный свёрточный нейрон с $(2A+1)(2B+1)$ весами:
+	\begin{equation*}
+		(x*\text{w})[i,j]=\sum_{a=-A}^{A}\sum_{b=-B}^{B}\text{w}_{a,b}x[i+a,j+b]
+	\end{equation*}
+	\includegraphics[width=\textwidth]{cnn.png}
+\end{frame}
+
+\begin{frame}{Пример свертки }
+	\includegraphics[width=0.9\textwidth]{pollingexample.png}
+\end{frame}
+\begin{frame}{Pooling слой нейронов}
+	Объединяющий нейрон -- это необучаемая свертка с шагом $h>1$, агрегирующая данные прямоугольной области $h\times h$:
+	\begin{equation*}
+		y[i,j]=F(x[h_i,h_j],\ldots,x[h_i+h-1,h_j+h-1]),
+	\end{equation*}
+	где F -- агрегирущая функция: max,average,min.\\
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{pooling.png}
+	\end{center}
+\end{frame}
+\begin{frame}{Схема сверточной сети}
+\includegraphics[width=1.1\textwidth]{cnnexample.png}
+\end{frame}
+\begin{frame}{Уменьшение размерности при помощи CNN}
+	\includegraphics[width=\textwidth]{demension.png}
+\end{frame}
+
+\begin{frame}{ImageNet}
+	\includegraphics[width=\textwidth]{ImageNet.png}
+\end{frame}
+
+\begin{frame}{Приемы используемые в CNN}
+	\begin{itemize}
+		\item Подбор числа слоёв и их размерности 
+		\item Dropout
+		\item batch normalization
+		\item augmentation( Только для картинок)
+	\end{itemize}
+\end{frame}
+\begin{frame}{Augumentation}
+	\begin{definition}
+		Аугументация (Augumentation)~--- увеличение объёма тренировочной выборки с помощью различных афинных преобразований изображений: зеркальное отражение, поворот, сдвиг, изменение масштаба.
+	\end{definition}
+	Используется для борьбы с переобучением.
+	\begin{center}
+	
+
+	\includegraphics[width=0.6\textwidth]{aug.png}
+	\end{center}
+\end{frame}
+\begin{frame}{Dropout}
+	\begin{definition}
+		Dropout~--- отключение (зануление) случайных нейронов во время обучения нейросети. Параметр $p$~--- доля отключаемых нейронов. Оставшимся ненулевым нейронам присваиваем вес, равный $\frac1{1-p}$. 
+	\end{definition}
+	Цель: борьба с переобучением
+	\includegraphics[width=0.9\textwidth]{drop.png}
+\end{frame}
+\begin{frame}{Применение CNN для аудиофайлов}
+	Последовательные фрагменты сигнала представляются векторами спектрального разложения
+	\includegraphics[width=\textwidth]{sound.png}
+	
+\end{frame}
+\begin{frame}{Спектрограмма}
+	\includegraphics[width=\textwidth]{spec.png}
+\end{frame}
+\begin{frame}{CNN для обработки текста}
+	Последовательные слова в тексте представляются векторами с помощью векторных представлений(fastText, word2vec, One-hot encoding и тд.)
+	\includegraphics[width=\textwidth]{nlp.png}
+\end{frame}
+
+\begin{frame}{word2vec}
+	\includegraphics[width=\textwidth]{king.png}
+	\includegraphics[width=\textwidth]{quin.png}
+\end{frame}
+\begin{frame}{Обобщение идеи}
+	\includegraphics[width=\textwidth]{all.png}
+\end{frame}
+\begin{frame}{Практические проблемы}
+	Проблемы:
+		\begin{itemize}
+			\item Необходимость разметки данных для обучения
+			\item Большое количество параметров, следовательно долгое обучение, даже на GPU
+		\end{itemize}
+	Решения:
+		\begin{itemize}
+			\item Использование размеченных библиотек изображений: Imagenet (14M изображений, 1000 категорий), OpenImages (9М изображений, 60К меток, 20К категория)
+			\item Использование предобученной модели (Alexnet, vgg net, Resnet) 
+		\end{itemize}
+\end{frame}
+
+\begin{frame}{Напоминание про функции активации}
+	\includegraphics[width=\textwidth]{relu.png}
+	Мертвые нейроны -- ситуация, когда входной сигнал $\leq 0$.В результате некоторые нейроны становятся неактивными и не будут участвовать в обработке данных.
+\end{frame}
+\begin{frame}{AlexNet}
+	\includegraphics[width=\textwidth]{AlexNet.png}
+\end{frame}
+
+\begin{frame}{Unet}
+	\includegraphics[width=\textwidth]{unet.jpg}
+\end{frame}
+
+\begin{frame}{vgg16}
+	\includegraphics[width=\textwidth]{vgg16.png}
+\end{frame}
+
+
+\end{document}
