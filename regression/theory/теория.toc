@@ -1,0 +1,12 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{\numberline {1}Про обучение с учителем}{3}{}%
+\contentsline {section}{\numberline {2}Регрессия}{3}{}%
+\contentsline {subsection}{\numberline {2.1}Задача оптимизации}{3}{}%
+\contentsline {subsection}{\numberline {2.2}Случай линейной регрессии}{4}{}%
+\contentsline {subsection}{\numberline {2.3}МНК и SVD}{4}{}%
+\contentsline {section}{\numberline {3}Регуляризация}{5}{}%
+\contentsline {subsection}{\numberline {3.1}Ridge}{6}{}%
+\contentsline {subsection}{\numberline {3.2}Lasso}{6}{}%
+\contentsline {section}{\numberline {4}Работа с признаками}{8}{}%
+\contentsline {subsection}{\numberline {4.1}Feature Extraction. Анализ главных компонент}{8}{}%
+\contentsline {subsection}{\numberline {4.2}Feature Selection. Информационные критерии}{9}{}%

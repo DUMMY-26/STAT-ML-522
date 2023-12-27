@@ -1,0 +1,733 @@
+\documentclass[11pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usetheme{Boadilla}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{lmodern}
+\usepackage[T2A]{fontenc}
+\usepackage{cmbright}
+\usepackage[russian]{babel}
+%\usetheme{Darmstadt}
+
+\usetheme{Boadilla}
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{dsfont}
+\usepackage{graphicx}
+
+% Использовать полужирное начертание для векторов
+\let\vec=\mathbf
+
+\DeclareMathOperator{\mathspan}{span}
+\DeclareMathOperator{\mathdim}{dim}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\diag}{diag}
+
+\begin{document}
+	\author{Гриненко Ю., Хасанова К.}
+	\title[Статистическое и машинное обучение] {Обучение с учителем. Классификация. Дискриминантный анализ. Логистическая регрессия. Метод опорных векторов. Выбор модели с помощью кросс-валидации. Метод стохастического градиента.}
+	%\subtitle{}
+	%\logo{}
+	\institute[]{Санкт-Петербургский государственный университет 
+		
+		Кафедра статистического моделирования
+	}
+	\date{2023}
+	\subject{Семинар по статистическому и машинному обучению}
+	\setbeamercovered{transparent}
+	\setbeamertemplate{navigation symbols}{}
+	\begin{frame}[plain]
+		\maketitle 
+	\end{frame}
+	
+	
+	\begin{frame}
+		\frametitle{Классификация. Задача.}
+		
+		Дано:
+		\begin{itemize}
+			\item Множество объектов $X \in \mathbb{R}^p$;
+			\item Множество ответов $Y$, $Y_i \in \mathcal{G}$.
+		\end{itemize}
+		Задача
+		\begin{itemize}
+			\item По выборке $X^N = (\mathbf{x}_i, y_i)_{i = 1}^N$ построить классификатор $a: \mathbb{R}^p \rightarrow \mathcal{G}$, который по новому вектору признаков $X$ предскажет отметку класса, т.е. $a(\mathbf{x}) \in \mathcal{G}$;
+			\item На $a(\mathbf{x})$ должна достигаться минимальная ошибка классификации в некотором смысле;
+			\item Хотим знать вероятности принадлежности объекта к тому или иному классу.
+		\end{itemize}
+	
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Классификация. Задача.}
+	
+	На генеральном языке:
+	\begin{itemize}
+		\item $\boldsymbol{\xi} \in \mathbb{R}^p$ -- случайный вектор признаков;
+		\item $\eta \in \mathcal{G} = \{G_k\}_{k = 1}^K$ -- дискретная случайная величина, класс;
+		\item $P(\boldsymbol{\xi}, \eta)$ -- их совместное распределение.
+	\end{itemize}
+	\bigskip
+	Дано: выборка $(\mathbf{x}_i, y_i)_{i = 1}^N$ -- $N$ реализаций случайных векторов $(\boldsymbol{\xi}, \eta)$.
+	
+	\bigskip
+	Строим классификатор
+	\begin{eqnarray}\label{Base}  
+		f : \mathbb{R}^p \rightarrow \mathcal{G}. 
+	\end{eqnarray}
+	
+	Запишем в форме
+	\begin{eqnarray}\label{Base_2}  
+		f (x_i, w) = sign (\langle x_i, w \rangle - w_o) = sign \sum_{i=1}^{n} w_i x_i - w_o.
+	\end{eqnarray}
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Ключевые понятия}
+	
+	Вводим несколько ключевых понятий:
+	
+	\begin{itemize}
+		\item Величина отступа (margin) --- $M_i (w, w_0) = (\langle x_i, w \rangle - w_0) y_i$; чем меньше значение отступа, тем ближе объект к границе классов, соответственно;
+		\item Функция потерь $\mathcal{L} (a, x)$ --- неотрицательная функция, характеризующая величину ошибки предсказания на объекте $x_i$. Задачу классификации можно свести к минимизации функции потерь;
+		\item Функционал качества алгоритма $Q(a, X^n) = \frac{1}{n} \sum_{i = 1}^n \mathcal{L} (a, x_i)$ на выборке $X^n$, также называемый эмпирическим риском.
+	\end{itemize} 
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Margin-based loss function}
+	
+	\begin{figure}
+		\includegraphics[width=0.8\linewidth]{img_2}
+		\caption{Непрерывные аппроксимации пороговой функции потерь}
+		\label{1}
+	\end{figure}
+	
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Дискриминантный анализ}
+	
+	
+	Строим классифицирующие функции $f_i$, индивид относится к классу с максимальным значением классифицирующей функции на нем. 
+		\begin{eqnarray}\label{classification_1}  
+		f(x) = \underset{{Y \in \mathcal{G}}}{\arg \max}  P (Y \vert \xi = x). 
+		\end{eqnarray}
+	
+	\bigskip
+	
+	В качестве классифицирующих функций берем
+	\begin{eqnarray}\label{Discr_functions}  
+		f_i (x) = \frac {p_i(x) \pi_i}{\sum_{j=1}^{K} p_j (x) \pi_j}. 
+	\end{eqnarray}
+
+	Априорные вероятности выбираем в зависимости от наших предположений/задачи.
+
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{LDA}
+	
+	В LDA предполагаем нормальное распределении классов с одинаковой ковариационной матрицей. Классифицирующие функции имеют вид
+	\begin{eqnarray}\label{LDA}  
+		f_i (x) = \frac {\pi_i}{(2\pi)^{p/2} \vert \Sigma \vert ^{1/2}} \textrm{exp} \left(-\frac{1}{2}(x-\mu_i)^\mathsf{T}\Sigma^{-1}(x-\mu_i)\right), 
+	\end{eqnarray}
+	
+	\bigskip
+		
+	и приводятся к виду 
+	\begin{eqnarray}\label{LDA}  
+		h_i (x) = - \frac{1}{2} \mu_{i}^\mathsf{T} \Sigma^{-1} \mu_i + \mu_{i}^\mathsf{T} \Sigma^{-1}x + log \ \pi_i.
+	\end{eqnarray}
+
+	
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{QDA}
+	
+	Применяем QDA, когда каждый класс имеет многомерное нормальное распрелеление и различные ковариационные матрицы $\Sigma_{i=1}^K$. Классифицирующие функции принимают вид 
+	
+	\begin{eqnarray}\label{QDA}  
+		g_i (x) = log \ f_i(x) = log \ \pi_i - \frac{1}{2} log \vert \Sigma_i \vert - \frac{1}{2} (x^\mathsf{T} - \mu_i) \Sigma_{i}^{-1} (x-\mu_i).
+	\end{eqnarray}
+	
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Метод максимального правдоподобия}
+	
+	Параметры распределений классов нам не известны, используем оценки ОМП.
+	\begin{itemize}
+		\item Среднее
+		$\widehat{\mu}_i = \frac{1}{n_i}\sum\limits_{j: y_j = G_i} \mathbf{x}_j$,
+		\item Ковариационная матрица класса $\hat \Sigma_i = \frac{1}{n_i - 1}\sum\limits_{j: y_j = G_i} (\mathbf{x}_j - \widehat{\mu}_i)^\mathrm{T}(\mathbf{x}_j - \widehat{\mu}_i)$,
+		\item Pooled ковариационная матрица $\hat \Sigma= \sum\limits_{j = 1}^K\frac{n_i - 1}{n - K} \hat \Sigma_i$.
+	\end{itemize}
+	
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{RDA}
+	
+	RDA представляет собой компромисс между LDA и QDA. Стягиваем ковариации каждого класса к общей матрице
+	\begin{align*}
+		\hat{\Sigma}_i(\alpha) = \alpha \widehat{\Sigma}_i + (1 - \alpha)\hat{\Sigma},
+	\end{align*}
+	
+	$\alpha \in [0; 1]$ --- настраиваемый параметр, определяющий, оценивать ли ковариации отдельно $\alpha = 1$ или совместно $\alpha = 0$ (pooled).
+	
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Канонические переменные}
+	
+	Задача состоит в нахождении линейного преобразования $\mathbf{Z} = A^T \mathbf{X}$. 
+	
+	В англоязычной литературе имеет название CDA (Canonical Discriminant Analysis)
+	
+	Новые признаки $\textbf{Z}=A^{\mathrm{T}}\textbf{X}$. Выборочная ковариационная матрица новых признаков:
+	\begin{eqnarray}\label{CDA_3}
+		A^{\mathrm{T}}\textbf{T}A=A^{\mathrm{T}}(\textbf{E}+\textbf{H})A=A^{\mathrm{T}}\textbf{E}A+A^{\mathrm{T}}\textbf{H}A,
+	\end{eqnarray}
+
+	$\textbf{E}/\textbf{H}$ - оценка внутригрупповых/межгрупповых отклонений соответственно, $\textbf{T}$ --- total covariance matrix.
+	
+
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Канонические переменные}
+
+	\begin{figure}
+		\includegraphics[width=\linewidth]{img_1}
+	\caption{Canonical Discriminant Analysis and PCA on data}
+	\label{2}
+	\end{figure}
+	
+	\end{frame}
+
+
+		
+
+
+\begin{frame}
+	\frametitle{Логистическая регрессия}
+	
+	Линейный классификатор. Минимизации эмпирического риска:
+	\begin{eqnarray}
+		Q(w) = \sum_{i = 1}^n ln(1 + exp(-y_i \langle      x_i, w \rangle)) \rightarrow \underset{w} \min.
+	\end{eqnarray}
+
+	Когда решение $w$ найдено, можем оценивать апостериорные вероятности принадлежности классам:
+	$$
+	p=\sigma(\langle w,X_{i} \rangle),
+	$$
+	
+	где $\sigma$ -- сигмоидная функция: 
+	$$
+	\sigma(M)=\frac{1}{1+e^{-M}}.
+	$$
+	
+
+	
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Логистическая регрессия}
+	
+	Отступ $M$ отрицательный, когда алгоритм $a (x, w)$ допускает ошибку на объекте $x_i$. Число ошибок классификации через отступы:
+	$$
+	Q(w) = \sum_{i=1}^{n} [M (x_i) < 0] .
+	$$
+	
+	Идея в замене пороговой функции потерь непрерывной оценкой сверху:
+	
+	$$
+	[M (x_i) < 0] \le log_2 (1 + e^{-M}).
+	$$
+	
+	
+	Так получаем функционал (9) с предыдущего слайда.
+
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Логистическая регрессия}
+	
+	Используем logit преобразование, логарифм отношения вероятности положительного события к отрицательному $\log(\frac{p}{1-\mathrm{p}})$.
+	$$
+	\langle w,x_{i}\rangle=\log(\frac{p}{1-p}); e^{\langle w,x_{i}\rangle}=\frac{p}{1-p},
+	$$
+	$$
+	\mathrm{p}=\frac{1}{1+e^{-\langle w,x_{i}\}}}.
+	$$
+	
+
+	
+	Справа сигмоида $\sigma$. Свойства:
+	\begin{itemize}
+		\item Монотонно возрастает;
+		\item отображает всю числовую прямую на интервал (0; 1);
+		\item $\sigma(-x) = 1 - \sigma(x)$. 
+	\end{itemize}
+
+	Апостериорные вероятности необходимы для оценивания рисков, связанных с возможными ошибками классификации.
+
+	
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Логистическая регрессия}
+		
+	Как оптимизировать $w$ так, чтобы модель как можно лучше предсказывала логиты? ММП для распределения Бернулли.
+	$$
+	p(y|X,\ w)=\prod_{i=1}^{n} p_{i}^{y_{\mathfrak{i}}}(1-p_{i})^{1-y_{i}}.
+	$$
+	
+	Приводим к логарифмическому виду:
+	$$
+	\ell(w,X,y)=\sum_{i=1}^{n} (y_{i}\log(p_{i})+(1-y_{i})\log(1-p_{i}))=
+	$$
+	$$
+	=\sum_{i=1}^{n} (y_{i}\log(\sigma(\langle w,x_{i} \rangle))+(1-y_{i})\log(1-\sigma(\langle w,\ x_{i}\rangle))).
+	$$
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Логистическая регрессия}
+	$$
+	\ell(w,X,y)=\sum_{i=1}^{n}(y_{i} \log(\sigma(\langle w,x_{i} \rangle))+(1-y_{i})\log(\sigma(-\langle w,\ x_{i}\rangle))).
+	$$
+	
+	Максимизация правдоподобия эквивалентна минимизации функционала, гладко аппроксимирующего эмпирический риск. Чтобы получить функцию потерь, которую мы будем минимизировать, умножаем на $-1$ и получаем
+	$$
+	\mathcal{L}(w,X,y)=-\sum_{i=1}^{n} (y_{i}\log(\sigma(\langle w,x_{i} \rangle))+(1-y_{i})\log(\sigma(-\langle w,x_{i} \rangle))).
+	$$
+	
+	Методы решения задачи минимизации --- метод стохастического градиента, метод Ньютона-Рафсона.
+	
+\end{frame}
+
+
+
+\begin{frame}
+	\frametitle{Метод опорных векторов}
+	
+	Линейный классификатор, задача классификации в рамках обучения с учителем.
+	Имеется выборка $\left\{\left(x_1, y_1\right), \dots, \left(x_n, y_n\right)\right\}$, $x_i\in\mathbb{R}^p$, $y_i\in\left\{-1, 1\right\}$;
+	задачей является построение классифицирующего правила $f:\mathbb{R}^p\rightarrow \left\{-1, 1\right\}$. Не накладывается ограничений на распределение.
+	
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Hard-margin SVM}
+	
+	Линейный классификатор:
+	\begin{eqnarray}
+		f\left({x}_i\right)=sign\left(\langle{x}_i,{w}\rangle -w_0\right),
+	\end{eqnarray}
+	
+	Уравнение, описывающее гиперплоскость, разделяющую классы в пространстве $\mathbb{R}$:
+	$$
+	\langle w, x \rangle = w_0. 
+	$$
+	
+	Предполагаем линейная разделимость классов (есть $w, w_0$, при которых функционал принимает нулевое значение):
+	\begin{eqnarray}
+		Q(w,\ w_{0})=\sum_{i=1}^{n}[y_{i}(\langle w,\ x_{i}\rangle-w_{0})<0]
+	\end{eqnarray}
+	
+	Критерий оптимальности: максимальное расстояние между
+	двумя гиперплоскостями, параллельных данной, без точек между ними. Точки, которые	принадлежат одной из гиперплоскостей — опорные вектора.
+		
+		
+\end{frame}
+
+\begin{frame}
+	\frametitle{Hard-margin SVM}
+	
+	
+	\begin{figure}
+		\includegraphics[width=0.8\linewidth]{Hard_margin}
+		\caption{Decision boundary}
+		\label{3}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Hard-margin SVM}
+	
+	Параметры линейного порогового классификатора определены с точностью до нормировки. Коэффициенты $w, w_0$ можем умножить на константу так, что
+	$$
+	\langle w,\ x_{i}\rangle-w_{0}=y_{i}.
+	$$
+	
+	\begin{center}
+		$\langle w, x_{i}\rangle-w_{0} = \left\{\begin{array}{ll}
+			\leq-1, if \ y_{i}=-1;\\
+			\geq+1, if \ y_{i}=+1.
+		\end{array}\right.$
+	\end{center}
+	
+	Условие $-1<\langle w, x\rangle-w_{0}<1$ задаёт полосу, разделяющую классы.
+	
+	Ширина полосы
+			
+	\begin{align*}
+		\langle(x_{+}-x_{-}),\ \frac{w}{\Vert w\Vert}\rangle=\frac{\langle w,x_{+}\rangle-\langle w,x_{-}\rangle}{\Vert w\Vert}=\frac{(w_{0}+1)-(w_{0}-1)}{\Vert w\Vert}=\frac{2}{\Vert w\Vert}.
+	\end{align*}
+	
+	Ширина полосы максимальна, когда норма вектора $w$ минимальна.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Обобщение задачи. Soft-Margin}
+	
+	Построение оптимальной разделяющей гиперплоскости сводится к минимизации квадратичной формы
+	$$
+	\begin{cases}
+		\frac{1}{2}\lVert w \rVert^2 \rightarrow \min\limits_{\boldsymbol{w}};\\
+		\left(\langle{x}_i,{w}\rangle - w_0\right)y_i \geq 1. \\
+	\end{cases}
+	$$
+	
+	Обобщение на случай линейно неразделимых выборок. Позволим алгоритму допускать ошибки на обучающих объектах.
+	
+	Введём набор дополнительных переменных $\xi > 0$, характеризующих величину ошибки на объектах $x_i, i = 1,... ,n$ ($C$ задает размер штрафа за ошибки.). 
+	
+	$$ 
+	\begin{cases}
+		\frac{1}{2}\langle w,\ w\rangle+C\sum_{i=1}^{n}\xi_{i}\rightarrow \underset{w,w_{0},\xi} \min ;\\
+		y_{i}(\langle w,\ x_{i}\rangle-w_{0})\geq 1-\xi_{i},\ \forall i;\\
+		\xi_{i}\geq 0,\ \forall i.
+	\end{cases}
+	$$
+	
+
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Обобщение задачи. Soft-Margin}
+	Отступ объекта $x_i$ от границы классов:
+	$$
+	[M_{i}<0]\leq(1-M_{i})_{+}.
+	$$
+	
+	Ошибка $\xi_i$ выражается через отступ $M_i$.  Т.к. минимизации суммы $\sum_{i=1}^{n} \xi_i$, то можем записать$\xi_i = (1 - M_i)_+$. Задача эквивалентной минимизации функционала $Q$, не зависящего от $\xi_i$:
+	
+	\begin{center}
+		$Q(w,\displaystyle \ w_{0})=\sum_{i=1}^{n}(1-M_{i}(w, w_{0}))_{+}+\frac{1}{2C}\Vert w\Vert^{2}\rightarrow\min_{w,w_{0}}$.   
+	\end{center}
+
+	Верхняя оценка эмпирического риска, к которому добавлен регуляризатор $\Vert w\Vert^{2},$ параметр регуляризаци $\displaystyle \frac{1}{2\mathrm{C}}.$ ($[M_{i}<0]\leq(1-M_{i})_{+}$)
+	
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Обобщение задачи. Soft-Margin}
+	Замена пороговой функции потерь $[M<0]$ кусочно-линейной верхней оценкой
+	$\mathcal{L}(M)=(1-M)_{+}$ делает функцию потерь чувствительной к величине ошибки. Функция потерь $\mathcal{L}(M)$ штрафует объекты за приближение к границе классов.
+	
+	Двойственная задача. Запишем функцию Лагранжа:
+	$$
+	\mathcal{L}(w, w_{0}, \xi;\lambda, \eta)=\frac{1}{2}\Vert w\Vert^{2}+C \sum_{i=1}^{n} \xi-\sum_{i=1}^{n}\lambda_{i}(M_{i}(w,w_{0})-1+\xi_{i})-\sum_{i=1}^{n} \xi_{i}\eta_i=
+	$$
+	$$
+	=\frac{1}{2}\Vert w\Vert^{2}-\sum_{i=1}^{n}\lambda_{i}(M_{i}(w,w_{0})-1)-\sum_{i=1}^{n}\xi_{i}(\lambda_{i}+\eta_{i}-C),
+	$$
+	
+	где $\lambda=(\lambda_{1},\ \ldots,\ \lambda_{n})$ --- вектор переменных, двойственных к $w$; $\eta=(\eta_{1},\ \ldots,\ \eta_{n})$ --- вектор
+	переменных, двойственных к $\xi$.
+
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Обобщение задачи. Soft-Margin}
+Согласно теореме Куна-Таккера, задача эквивалентна двойственной задаче поиска седловой точки функции Лагранжа:
+$$
+\begin{cases}
+	\mathcal{L}(w, w_{0}, \xi;\lambda,\eta)\rightarrow \underset{w,w_{0},\xi} \min  \underset{\lambda,\eta} \max; \\
+	\xi_{i}\geq 0,\ \lambda_{i}\geq 0,\ \eta_{i}\geq 0,\ i=1,\ \ldots,\ n;\\
+	\lambda_{i}=0\ либо M_{i}(w,\ w_{0})=1-\xi_{i},\ i=1,\ \ldots,\ n;\\
+	\eta_{i}=0\ либо \xi_{i}=0,\ i=1,\ \ldots,\ \ell;
+\end{cases}
+$$
+
+Необходимым условием седловой точки функции Лагранжа является равенство
+нулю её производных. Отсюда получаются соотношения:
+$$
+\begin{cases}
+	\frac{\partial}{\partial w}: & w = \sum\limits_{i=1}^{n}\lambda_i y_i x_i \\
+	\frac{\partial}{\partial w_0}: & 0=\sum\limits_{i=1}^{n}\lambda_i y_i \\
+	\frac{\partial}{\partial \xi_i}: & \lambda_i=C-\eta_i \\
+\end{cases}
+$$
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Обобщение задачи. Soft-Margin}
+	Согласно теореме Куна-Таккера, задача эквивалентна двойственной задаче поиска седловой точки функции Лагранжа:
+	$$
+	\begin{cases}
+		\mathcal{L}(w, w_{0}, \xi;\lambda,\eta)\rightarrow \underset{w,w_{0},\xi} \min  \underset{\lambda,\eta} \max; \\
+		\xi_{i}\geq 0,\ \lambda_{i}\geq 0,\ \eta_{i}\geq 0,\ i=1,\ \ldots,\ n;\\
+		\lambda_{i}=0\ либо M_{i}(w,\ w_{0})=1-\xi_{i},\ i=1,\ \ldots,\ n;\\
+		\eta_{i}=0\ либо \xi_{i}=0,\ i=1,\ \ldots,\ \ell;
+	\end{cases}
+	$$
+	
+	Необходимым условием седловой точки функции Лагранжа является
+	равенство нулю её производных. Отсюда получаются соотношения:
+	$$
+	\begin{cases}
+		\frac{\partial}{\partial w}: & w = \sum\limits_{i=1}^{n}\lambda_i y_i x_i \\
+		\frac{\partial}{\partial w_0}: & 0=\sum\limits_{i=1}^{n}\lambda_i y_i \\
+		\frac{\partial}{\partial \xi_i}: & \lambda_i=C-\eta_i \\
+	\end{cases}
+	$$
+	
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Обобщение задачи. Soft-Margin}
+	$$
+	\begin{cases}
+		\frac{\partial}{\partial w}: & w = \sum\limits_{i=1}^{n}\lambda_i y_i x_i \\
+	\end{cases}
+	$$
+	
+	Искомый вектор весов $w$ является линейной комбинацией векторов обучающей выборки $x_i$, причём только тех, для которых $\lambda_i > 0$. Используя эти равенства, получаем
+	
+		$$
+	\begin{cases}
+		-\mathcal{L}(\lambda)=-\sum\limits_{i=1}^n\lambda_i+\frac{1}{2}\sum\limits_{i=1}^{n}\sum\limits_{j=1}^{n}\lambda_i\lambda_j y_i y_k \langle x_i,  x_j \rangle \rightarrow \min\limits_{\lambda} \\
+		0 \leq \lambda_i \leq C, \forall i \\
+		\sum\limits_{i=1}^{n}\lambda_i y_i=0 \\
+	\end{cases}
+	$$
+	
+	Данная двойственная задача имеет единственное решение. Константу C обычно выбирают по критерию скользящего контроля.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Обобщение задачи. Soft-Margin}
+	Для определения порога $w_0$ достаточно взять произвольный опорный граничный вектор $x_i$ и выразить $w_0$ из равенства $w_{0}=\langle w, x_{i}\rangle-y_{i}$.
+	
+	Алгоритм классификации представляется в следующем виде:
+	
+	\begin{center}
+		$a(x)=$ sign ($\displaystyle \sum_{i=1}^{n}\lambda_{i}y_{i}\langle x_{i},\ x\rangle-w_{0})$
+	\end{center} 
+	
+	Cуммирование только по опорным векторам, для которых $\lambda_i \neq 0$. 
+		
+	Но ненулевыми $\lambda_I$ обладают не только опорные объекты, но и объекты-нарушители. Это недостаток SVM, т.к. ими часто оказываются шумовые выбросы, и построенное на них решающее правило опирается на шум. 
+\end{frame}
+
+\begin{frame}{Спрямляющее пространство}
+	По построению, SVM применим лишь к (почти) линейно-разделимым данным.
+	
+	Предположим, что известен набор отображений 
+	$$\left\{\varphi_j\left(x\right)\right\}_{j=1}^{d}$$
+	$$\varphi_j:\mathbb{R}^p\rightarrow \mathbb{R}$$
+	таких, что набор данных 
+	$$\left\{\tilde{x}_i=\begin{pmatrix}
+		\varphi_1\left(x_i\right) \\
+		\vdots \\
+		\varphi_d\left(x_i\right) \\
+	\end{pmatrix}, y_i\right\}_{i=1}^{n}$$
+	линейно разделим; будем называть пространство, в котором наблюдается
+	разделимость, спрямляющим пространством.
+	
+\end{frame}
+
+\begin{frame}{Двойственная задача в спрямляющем пространстве}
+	Записывая двойственную задачу в спрямляющем пространстве,
+	$$
+	\sum\limits_{i=1}^{n}\lambda_i - \frac{1}{2}\sum\limits_{i=1}^n\sum\limits_{j=1}^n\lambda_i\lambda_jy_iy_j\langle x_i,  x_j \rangle \rightarrow \max\limits_{\lambda_i} 
+	$$
+	можно заметить, что ${x}_i$ входят в её формулировку лишь в виде скалярных произведений $\tilde{x}_i^\intercal \tilde{x}_j$.
+	
+	Также, используя выражение
+	$$w = \sum\limits_{i=1}^{n}\lambda_i y_i {x}_i$$
+	вычисление расстояния до разделяющей гиперплоскости (со знаком)	также сводится к использованию скалярных произведений ${x}_i$.
+	
+\end{frame}
+\begin{frame}
+	\frametitle{The Kernel Trick}
+	Скалярного произведения в спрямляющем пространстве достаточно для построения классифицирующего правила. Знание отображений $\varphi_j$ не требуется и спрямляющее пространство может быть бесконечномерным.
+	
+	Пусть $K\left(u,v\right):X\times X\rightarrow \mathbb{R}$ -- отображение:
+	\begin{itemize}
+		\item Симметричное: $K\left(u, v\right)=K\left(v, u\right),$
+		\item Положительно определённое: $\iint\limits_{X\times X}K\left(u,v\right)g\left(u\right)g\left(v\right) \ $d${u} \ $d${v} \geq 0, \forall g:X\rightarrow \mathbb{R}.$
+	\end{itemize}
+	
+	Тогда (и только тогда) существует пространство $H$ и отображение $\varphi:X\rightarrow H: K\left(u,v\right)=\left\langle\varphi\left(u\right), \varphi\left(v\right)\right\rangle_H.$
+	
+	После перехода в новое пространство (с помощью $\varphi$) исходные данные могут стать почти линейно-разделимыми.
+	
+\end{frame}
+\begin{frame}
+	\frametitle{The Kernel Trick}
+	Способы построения ядер:
+	
+	\begin{itemize}
+		\item Произвольное скалярное произведение $K(u,\ v)=\langle u,  v \rangle$;
+		\item Константа $K(u,\ v)=1$ является ядром;
+		\item Произведение ядер $K(u,\ v)=K_{1}(u,\ v)K_{2}(u,\ v)$ является ядром;
+		\item Для любой функции $\psi$ : $X\rightarrow \mathbb{R}$ произведение $K(u,\ v)=\psi(u)\psi(v)$ является ядром.
+		\item Линейная комбинация ядер с неотрицательными коэффициентами $K(u,\ v)=\alpha_{1}K_{1}(u,\ v)+\alpha_{2}K_{2}(u,\ v)$ является ядром;
+		\item Композиция произвольной функции  $\varphi$ : $X\rightarrow X$ и произвольного ядра $K_{0}$ является ядром: $K(u,\ v)=K_{0}(\varphi(u),\ \varphi(v))$.
+	\end{itemize}
+	
+	Наиболее часто используемые ядра: линейное, полиномиальное, радиальное, сигмовидное.
+	
+\end{frame}
+\begin{frame}
+	\frametitle{The Kernel Trick}
+	
+		\begin{figure}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Kernel}
+		\caption{Plot classification boundaries with different SVM Kernels}
+		\label{4}
+	\end{figure}
+
+\end{frame}
+\begin{frame}
+	\frametitle{The Kernel Trick. Пример}
+	
+	Возьмём $X=\mathbb{R}^{2}$ и рассмотрим ядро $K(u,\ v)=\langle u, v\rangle^{2}$, где $u=(u_{1},\ u_{2})$ , $v=(v_{1},\ v_{2})$. Какое спрямляющее пространство и преобразование ему соответствует? Разложим 
+	
+	$$
+	K(u,\ v)=\langle u,\ v\rangle^{2}=\langle(u_{1},\ u_{2}),\ (v_{1},\ v_{2})\rangle^{2}=
+	$$
+	$$
+	=(u_{1}v_{1}+u_{2}v_{2})^{2}=u_{1}^{2}v_{1}^{2}+u_{2}^{2}v_{2}^{2}+2u_{1}v_{1}u_{2}v_{2}=
+	$$
+	$$
+	=\langle(u_{1}^{2},\ u_{2}^{2},\ \sqrt{2}u_{1}u_{2}),\ (v_{1}^{2},\ v_{2}^{2},\ \sqrt{2}v_{1}v_{2})\rangle.
+	$$
+	
+	Ядро $K$ представляется в виде скалярного произведения в пространстве $H = \mathbb{R}^{3}$. Преобразование $\psi:\mathbb{R}^{2}\rightarrow \mathbb{R}^{3}$ имеет вид $\psi:(u_{1},\ u_{2})\mapsto(u_{1}^{2},\ u_{2}^{2},\ \sqrt{2}u_{1}u_{2})$. Линейной поверхности в пространстве $H$ соответствует квадратичная поверхность в исходном пространстве $X$. Данное ядро позволяет разделить внутреннюю и наружную часть произвольного эллипса, что невозможно в исходном двумерном пространстве.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Метод стохастического градиента}
+	Стохастический градиентный спуск - оптимизационный алгоритм, при котором градиент оптимизируемой функции считается на каждой итерации от случайно выбранного элемента выборки. 
+	
+	Модификацией градиентного спуска, и в случае линейного классификатора искомый алгоритм имеет вид:
+	
+	\begin{eqnarray}
+		a(x, \omega) = \phi(\sum\limits_{j=1}^N \omega_jx^j - \omega_0),
+	\end{eqnarray}
+	
+	где $\phi(z) $ - функция активации. 
+	
+	Решаемая задача:
+	$$ Q(\omega) = \frac{1}{n}\sum\limits_{i=1}^{n}\mathcal{L}(a(x_i, \omega), y_i)\rightarrow\min\limits_{\omega}. $$
+\end{frame}
+
+\begin{frame}
+	\frametitle{Метод стохастического градиента}
+	
+	Обновление весов:
+	
+	\begin{eqnarray}
+		\omega^{(t+1)} = \omega^{(t)} - h\nabla Q(\omega^{(t)}).
+	\end{eqnarray}
+
+	Проблема GD --- чтобы определить новое приближение вектора весов необходимо вычислить градиент от каждого элемента выборки, что может сильно замедлять алгоритм.
+	Идея ускорения заключается в использовании либо одного элемента (SGD), либо некоторой подвыборки (Batch GD) для получения нового приближения весов. При подходе SGD веса обновляются:
+	
+	$$ \omega^{(t+1)} = \omega^{(t)} - h\nabla \mathcal{L}(a(x_i, \omega^{(t)}), y_i),$$ где $ i $ --- случайно выбранный индекс.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Метод стохастического градиента. Начальные веса}
+	
+	Новый стохастический градиент должен быть несмещённой оценкой полного градиента (сходимость SGD обеспечивается несмещенностью). Т.к. направление изменения $ \omega $ будет определяться за $ O(1) $, подсчет $ Q $ на каждом шаге будет слишком дорогостоящим. Для ускорения оценки используются рекуррентные формулы:
+	\begin{itemize}
+		\item Среднее арифметическое: $ \overline Q_m = \frac{1}{m}\mathcal{L}(a(x_{i_m}, \omega^{(m)}), y_{i_m}) + (1 - \frac{1}{m}) \overline Q_{m-1}$;
+		\item Экспоненциальное скользящее среднее: $ \overline Q_m = \lambda\mathcal{L}(a(x_{i_m}, \omega^{(m)}), y_{i_m}) + (1 - \lambda) \overline Q_{m-1}$, где $ \lambda $ --- темп забывания "предыстории" $ \ $ ряда.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{SGD}
+	Достоинства: метод легко реализуется, функция потерь и семейство
+	алгоритмов могут быть любыми, подходит для задач с большими данными, иногда можно получить решение даже не обработав всю выборку;
+
+	Недостатки: проблемы с локальными экстремумами (для борьбы с
+	этим используют технику "встряхивания коэффициентов"(jog of weights));
+	направление обновляется на основании получаемых в данный момент
+	данных; алгоритм может не сходиться или сходиться слишком медленно.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Критерии выбора модели. Скользящий контроль}
+	
+		Критерий выбора --- функционал $Q(\mu, {X}^n)$, характеризующий качество метода $\mu$. Так, метод минимизации эмпирического риска строит алгоритм с минимальным значением критерия
+	\begin{eqnarray}\label{Min_error_criterion}  
+		\mu ({X}^n) = \arg \min _{{a \in A}} Q(a, {X}^n). 
+	\end{eqnarray}
+	
+	Скользящий контроль (cross-validation, CV) --- процедура эмпирического оценивания, с помощью которой "эмулируется" \ наличие тестовой выборки, которая не участвует в обучении, но для которой имеются метки класса. Разбиение выборки: ${X}^L = {X}^n \cup {X}^k$. 
+	\begin{eqnarray}\label{CV}  
+		CV (\mu, {X}^n) =\frac{1}{N} \sum_{n = 1}^{N} Q (\mu(X_{n}^{n}), X_{n}^{k}). 
+	\end{eqnarray}
+	
+	
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Критерии выбора модели. CV (LOO)}
+	
+		Существует несколько вариантов скользящего контроля (Complete CV, leave-one-out CV, q-fold CV). Complete CV строится по всем $N = C_{L}^{K}$, вычислительно слишком сложен и применяется в теоретических исследования или если можно вывести удобную вычислительную формулу. На практике интересны другие 2 варианта. 
+
+		Leave-one-out CV:
+		\begin{eqnarray}\label{LOO}  
+			LOO(\mu, X^L) =\frac{1}{L} \sum_{i = 1}^{L} Q (\mu(X^L \backslash \{x_i\}), \{x_i\}). 
+		\end{eqnarray}
+		
+		Каждый объект участвует в контроле один раз, длина обучающих подвыборок на единицу меньше длины полной выборки. Обучать приходится $L$ раз, что тоже трудоемко.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Критерии выбора модели. CV (q-fold)}
+	
+		Q-fold CV --- случайное разбиение выборки на $q$ непересекающихся блоков одинаковой длины $l_1, ..., l_n$;$ X^L = X_{1}^{l_1} \cup \dots \cup  X_{q}^{l_q}$, $l_1 + \dots + l_q = L$. Блок по очереди становится контрольной подвыборкой, обучение по остальным q-1 блокам. Критерий определяется как средняя по всем блокам ошибка. 
+	\begin{eqnarray}\label{Q-fold}  
+		Q_{ext}(\mu, X^L) =\frac{1}{q} \sum_{n = 1}^{q} Q (\mu(X^L \backslash X_{n}^{l_n}), X_{n}^{l_n}). 
+	\end{eqnarray}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Критерии выбора модели}
+	Для выбора оптимального метода рекомендуется использовать несколько разные критериев. Например, отбираем  несколько лучших методов по критерию, затем из них выбрать тот, для которого другой критерий принимает наименьшее значение.
+\end{frame}
+
+
+\end{document}
